@@ -16,7 +16,7 @@ public class GusfotCommandTest {
 	
 		Command command = new GusfotCommand();
 		
-		String text = "하기스 기저귀 20매 x 3팩 + 60매";
+		String text = "하기스 기저귀 20매x3팩+60매";
 		String args[] = {"N매xN팩+N매", "#1=(#3/#2)=(20)=(60/3) 매 * (#2+(#3/#1)) 팩"};
 		
 		command.setData(text);
@@ -29,7 +29,7 @@ public class GusfotCommandTest {
 	public void testExecuteExpand() {
 		
 		String text = "하기스 기저귀 1~5단계";
-		String args[] = {"N~N단계", "#e~#s단계"};
+		String args[] = {"N~N단계", "#s~#e단계"};
 		
 		Command command = new GusfotCommand();
 		command.setData(text);

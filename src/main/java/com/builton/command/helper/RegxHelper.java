@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 
 public class RegxHelper {
 
-	public static JSONArray help(String regex, String text) {
+	public static JSONArray regex(String regex, String text) {
 		
 		JSONArray result = new JSONArray();
 		
@@ -30,6 +30,28 @@ public class RegxHelper {
 		 }
 		 
 		return result;	
+	}
+
+	public static String replace(String regex, String replacement, String source) {
+		return source.replaceAll(regex, replacement);
+		
+	}
+
+	public static String toPattern(String text) {
+		
+		String result = "";
+		
+		char[] chars = text.toCharArray();
+		StringBuilder builder = new StringBuilder();
+		
+		for (char ch : chars) {
+			String patternization = "\\";
+			builder.append(patternization+ch + "\\s*");
+//			builder.append(patternization+ch);
+		}
+		
+		result = builder.toString().replace("\\x", "[x]"); // java에서 \\x는 hexadecimal 을 표현 
+		return result;
 	}
 	 
 }

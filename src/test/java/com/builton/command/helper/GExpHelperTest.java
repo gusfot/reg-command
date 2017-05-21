@@ -17,13 +17,13 @@ public class GExpHelperTest {
 	public void testHelp() {
 		
 		
-		NCollection collection = new NCollection<>();
-		
-		collection.add(10);
-		collection.add(20);
-		collection.add(30);
-		collection.add(40);
-		collection.add(50);
+//		NCollection collection = new NCollection();
+//		
+//		collection.add(10);
+//		collection.add(20);
+//		collection.add(30);
+//		collection.add(40);
+//		collection.add(50);
 		
 		
 //		String text = "#1 #2 #3 #4 + #5";
@@ -37,13 +37,13 @@ public class GExpHelperTest {
 	@Test
 	public void testHelp1() {
 		
-		NCollection collection = new NCollection<>();
-		
-		collection.add(10);
-		collection.add(20);
-		collection.add(30);
-		collection.add(40);
-		collection.add(50);
+		NCollection collection = new NCollection();
+//		
+//		collection.add(10);
+//		collection.add(20);
+//		collection.add(30);
+//		collection.add(40);
+//		collection.add(50);
 		
 		String text = "#1=(#3/#2)=(20)=(60/3) 매 * (#2+(#3/#1)) 팩";
 		
