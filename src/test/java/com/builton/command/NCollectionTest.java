@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import com.builton.command.collection.NCollection;
-import com.builton.command.helper.RegxHelper;
+import com.builton.command.helper.RegexUtil;
 
 public class NCollectionTest {
 
@@ -17,7 +17,7 @@ public class NCollectionTest {
 		String from ="N~N단계";
 		
 		String fromPattern = from.replace("N", "\\d*");
-		JSONArray rest = RegxHelper.regex(fromPattern, source);
+		JSONArray rest = RegexUtil.regex(fromPattern, source);
 		
 		JSONArray nList = new JSONArray();
 		
@@ -25,7 +25,7 @@ public class NCollectionTest {
 			JSONObject jsonObj = ((JSONObject) obj);
 			String group = (String)jsonObj.get("group");
 			
-			JSONArray nArray = RegxHelper.regex("\\d+", group);
+			JSONArray nArray = RegexUtil.regex("\\d+", group);
 			nList.add(nArray);
 		}
 		

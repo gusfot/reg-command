@@ -4,7 +4,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-public class CalculatorHelper {
+public class CalculatorUtil {
 
 	/**
 	 * 문자열 수식 계산

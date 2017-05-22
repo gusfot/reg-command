@@ -1,14 +1,14 @@
 package com.builton.command.impl;
 
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.builton.command.collection.NCollection;
-import com.builton.command.helper.RegxHelper;
+import com.builton.command.helper.GusfotExpUtil;
+import com.builton.command.helper.RegexUtil;
 
 public class GusfotCommand extends AbstractCommand {
 
@@ -19,122 +19,111 @@ public class GusfotCommand extends AbstractCommand {
 	NCollection nColl = null;
 			
 	@Override
-	public Map<String, String> execute() {
+	public Object execute() {
 
 		String[] strArgs = ((String[])this.args);
 		from = strArgs[0];
 		to = strArgs[1];
 		source = (String)data;
+		String result = "";
 		
-
-		System.out.println("parse from...");
+		System.out.println("[[원본 데이터]]========================================================");
+		System.out.println("-source: " + source);
+		System.out.println("-to: " + to);
+		System.out.println("-from: " + from);
+		System.out.println("===================================================================");
 		
+		// 각 글단마다 \\를 붙여준다. ex) \\N\\매\\x\\N\\팩\\+\\N매 
+		String fromPattern = RegexUtil.toPattern(from);
 		
-		// TODO : 각 글단마다 \\를 붙여준다. ex) \\N\\매\\x\\N\\팩\\+\\N매 
-//		System.out.println( from.);
-		String fromPattern = RegxHelper.toPattern(from); 
-		fromPattern = fromPattern.replace("N", "d*");
-//		fromPattern = fromPattern.replace("\\x", "[x]");	// java에서 x는 hexadecimal로 판단..
-		JSONArray rest = RegxHelper.regex(fromPattern, source);
+		// 특정문자열 'N'은 숫자를 의미하므로, d*로 치환해준다.
+		fromPattern = GusfotExpUtil.replaceSpecificChar(fromPattern);
+		 
+		System.out.println("[[찾을 패턴]]=========================================================");
+		System.out.println("-pattern: " + fromPattern);
+		System.out.println("===================================================================");
 		
-		JSONArray nList = new JSONArray();
-
-		for (Object obj : rest) {
-			JSONObject jsonObj = ((JSONObject) obj);
-			String group = (String)jsonObj.get("group");
+		// 원본 문자열에서 찾고자하는 문자열 추출
+		JSONArray fromMatchResults = RegexUtil.regex(fromPattern, source);
+		
+		System.out.println("[[매칭 결과]]=========================================================");
+		System.out.println("-pattern result: " + fromMatchResults);
+		System.out.println("===================================================================");		
+		
+		if(fromMatchResults.size() > 0) {
 			
-			JSONArray nArray = RegxHelper.regex("\\d+", group);
-			nList.add(nArray);
-		}
-		
-		// 'N' 문자열이 있는 콜렉션 
-		nColl = new NCollection(nList);
-		
-		System.out.println("parse to...");
-		
-		System.out.println("to : " + to);
-		JSONArray list = RegxHelper.regex("#[\\d|se]+", to);
-		
-		for (Object object : list) {
-			JSONObject jObj = (JSONObject) object;
-			String sharpKey = (String)jObj.get("group");
-//			System.out.println(sharpKey +":" +nColl.get(sharpKey));
-			to = to.replace(sharpKey, (String)nColl.get(sharpKey));
-		}
-		
-		System.out.println(to);
-		
-		
-		String replacement = to;
-		
-		source = RegxHelper.replace(fromPattern, replacement, source);
-		System.out.println(source);
-		
-		
-		
-		
-		
-		System.out.println("executed!");
-		
-		return null;
-	}
-
-
-
-
-
-	/**
-	 * 숫자를 지시하는 특정문자:'N'
-	 * from문자열에서 "N"있을 경우 일반 정규식패턴으로 변경한다.
-	 * 그리고 N에 해당하는 값들을 저장한다.
-	 * @return
-	 */
-	private NCollection parseFrom() {
-		
-		System.out.println("parse from...");
-		
-		NCollection list = null;
-		
-		String fromPattern = from.replace("N", "\\d*");
-		
-		String regex = fromPattern;
-		
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(source);
-		
-		
-		while (matcher.find()) {
-
-			list = getMatchedList("\\d*", matcher.group());
-			break;
-		}
-		
-		return list;
-	}
-
-	private NCollection getMatchedList(String regex, String text) {
-		
-		NCollection list = new NCollection();
-		
-		// 숫자만 추출
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(text);
-		
-		while(matcher.find()) {
-			if(!"".equals(matcher.group())) {
-//				System.out.println("group: "+matcher.group() + "start: "+ matcher.start() + "end: " +matcher.end());
-//				list.add(matcher.group());
+			// 'N' 문자열 리스트
+			JSONArray nList = new JSONArray();
+	
+			for (Object matchResult : fromMatchResults) {
+				JSONObject jsonObj = ((JSONObject) matchResult);
+				String group = (String)jsonObj.get("group");
+				
+				JSONArray nArray = RegexUtil.regex("\\d+", group);	// 숫자만  추출..
+				nList.add(nArray);
 			}
-//			break;
+			
+			// 'N' 문자열이 있는 콜렉션 
+			nColl = new NCollection(nList);
+
+			to = GusfotExpUtil.replaceSharpKey(to, nColl);									// to 의 #1, #2 등의 #key의 값으로 변경처리
+			result = excuteExpands(to);														// #s~#e 패턴일때만 동작
+			result = RegexUtil.replaceCalculateAndCompare(fromPattern, result, source);		// #인덱스의 원본값으로 치환
+			
+			System.out.println("[[최종 결과]]=========================================================");
+			System.out.println("- result: " + result);
+			System.out.println("===================================================================");		
+		
+		}else {
+			
+			result = source;
 		}
 		
-		
-		return list;
+		return result;
 	}
-	
-	
-	
 
+	private String excuteExpands(String replacement) {
+		
+		JSONArray expandMatchedResults = RegexUtil.regex("#[\\\\d|se]+\\~#[\\\\d|se]+", to); 	// #s~#e, #e~#s 추출
+		StringBuilder sb = new StringBuilder();
+		
+		if(expandMatchedResults.size() > 0 ) {
+			
+			String extra = RegexUtil.replace("#[\\\\d|se]+\\~#[\\\\d|se]+", "", to);	 
+			JSONArray sharpKeyMatchedResults = RegexUtil.regex("#[\\d|se]+", to);
 
+			List<Integer> numbers = new ArrayList<>();
+			
+			for (Object sharpKeyResult : sharpKeyMatchedResults) {
+				
+				JSONObject obj = (JSONObject) sharpKeyResult;
+				String sharpKey = (String)obj.get("group");
+				int number = Integer.parseInt((String) nColl.get(sharpKey));
+				numbers.add(number);
+			}
+			
+			
+			if(numbers.get(0) > numbers.get(1)) {
+				
+				int begin = numbers.get(0);
+				int end = numbers.get(1);
+				
+				for(int i = begin; i>=end; i--) {
+					sb.append(i+extra +" ");
+				}
+			}else {
+				int begin = numbers.get(0);
+				int end = numbers.get(1);
+				
+				for(int i = begin; i<=end; i++) {
+					sb.append(i+extra +" ");
+				}
+			}
+			
+			replacement = sb.toString();
+		}
+		
+		return replacement;
+	}
 }
 

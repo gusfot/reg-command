@@ -11,7 +11,6 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -32,7 +31,7 @@ public class NCollection implements List {
 	}
 	
 	/**
-	 * #1, #2, #s, #e 로 인덱스 조회
+	 * #s, #e, #1, #2, #숫자 로 인덱스 조회
 	 * @param key
 	 * @return
 	 */
